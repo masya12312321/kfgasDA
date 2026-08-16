@@ -1,0 +1,79 @@
+mode: LIVE
+
+scanner:
+  interval_sec: 60
+  min_quote_volume_24h: 5000000        # min 24h turnover, USDT
+  max_symbols: 120
+  min_confidence: 65
+  cooldown_minutes: 20
+  cooldown_reset_score_delta: 0.25     # big score change resets cooldown
+  strengthen_delta: 15                 # confidence +15 => SIGNAL STRENGTHENED
+  max_concurrent: 8                    # semaphore for per-symbol analysis
+  alert_priorities: [HIGH, CRITICAL]   # LOW/NORMAL not sent by default
+
+oi:
+  windows_min: [5, 15, 60, 240, 1440]
+  spike_zscore: 2.0
+  anomaly_pct_4h: 4.0                  # |OI change| % considered anomaly
+  flush_pct: -5.0
+  accumulation_pct: 3.0
+  history_points: 288                  # 5m points = 24h
+
+funding:
+  extreme_percentile: 95
+  elevated_percentile: 80
+  very_extreme_abs: 0.001              # 0.1%
+  history: 90                          # funding periods (~30 days)
+
+orderbook:
+  depth: 50
+  imbalance_threshold: 0.15
+  wall_multiplier: 3.0                 # level >= 3x avg level size = wall
+
+cvd:
+  trades_window: 1000
+  divergence_lookback: 30              # candles for swing comparison
+
+volume_profile:
+  bins: 48
+  lookback_hours: 24
+  value_area_pct: 0.70
+  hvn_multiplier: 1.5                  # bin vol >= 1.5x mean = HVN
+  lvn_multiplier: 0.5
+
+volatility:
+  atr_period: 14
+  low_pct: 0.002                       # 15m realized vol
+  high_pct: 0.008
+
+signal:
+  strong_long: 0.70
+  long: 0.45
+  weak_long: 0.20
+  weak_short: -0.20
+  short: -0.45
+  strong_short: -0.70
+  min_quality_to_send: C               # D never sent
+
+weights:
+  oi: 0.20
+  funding: 0.10
+  cvd: 0.20
+  orderbook: 0.15
+  volume: 0.05
+  profile: 0.10
+  ema: 0.10
+  squeeze: 0.05
+  ls: 0.05
+
+learning:
+  auto_apply_weights: false            # suggest only, never self-modify
+  min_samples: 50
+
+risk:
+  enabled: true
+  atr_sl_mult: 1.5
+  tp_mults: [1.0, 2.0, 3.0]
+
+backtest:
+  default_days: 30
